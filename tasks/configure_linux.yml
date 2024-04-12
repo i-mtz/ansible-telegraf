@@ -187,3 +187,24 @@
       when: ansible_os_family == "RedHat"
 
   when: "'sensors' in telegraf_plugins_extra and not telegraf_agent_docker"
+
+- name: Copy telegraf ipmi sudo file to /etc/sudoers.d/telegraf
+  when:
+    - "'ipmi_sensor' in telegraf_plugins_extra"
+  with_dict: "{{ telegraf_plugins_extra }}"
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/telegraf
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes
+    content: |
+      #
+      # ansible managed
+      #
+      telegraf ALL= NOPASSWD: /usr/bin/ipmitool sdr
+  notify:
+    - Restart Telegraf
+  tags:
+    - telegraf
+    - monitoring

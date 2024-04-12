@@ -138,10 +138,11 @@
   apt:
     name: "{{ telegraf_agent_package }}"
     state: "present"
+    update_cache: yes
   register: is_telegraf_package_installed
   until: is_telegraf_package_installed is succeeded
   notify: "Restart Telegraf"
-  become: yes
+  become: true
   when:
     - telegraf_agent_package_method == "local-repo"
 

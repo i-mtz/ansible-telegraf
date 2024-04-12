@@ -6,6 +6,8 @@
     name: telegraf
     state: restarted
     enabled: true
+  register: is_telegraf_restarted
+  until: is_telegraf_restarted is succeeded
   when: not telegraf_agent_docker
   become: true
   ignore_errors: "{{ ansible_check_mode }}"
