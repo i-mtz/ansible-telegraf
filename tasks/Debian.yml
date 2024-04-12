@@ -134,6 +134,17 @@
     - telegraf_agent_package_method == "online" or telegraf_agent_package_method == "offline"
   ignore_errors: "{{ ansible_check_mode }}"
 
+- name: "Debian | Install Telegraf package from (local-repo)"
+  apt:
+    name: "{{ telegraf_agent_package }}"
+    state: "present"
+  register: is_telegraf_package_installed
+  until: is_telegraf_package_installed is succeeded
+  notify: "Restart Telegraf"
+  become: yes
+  when:
+    - telegraf_agent_package_method == "local-repo"
+
 - name: "Debian | Remove repository (online/offline install)"
   file:
     path: "/etc/apt/sources.list.d/telegraf.list"

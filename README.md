@@ -93,15 +93,16 @@ How `Telegraf` needs to be installed. There are 4 methods in getting `Telegraf` 
 * Via a download from the `https://dl.influxdata.com/` site ("online");
 * Already provided and is already available on the target host, but not yet installed/configured ("offline");
 * Already installed on the target host or done manually, but not yet configured ("manual");
+* Via a private repo using apt (Debian/Ubuntu only): ("local-repo");
 
-This can be configured by setting `telegraf_agent_package_method` to one of the appropriate values ( `repo`, `online`, `offline` or `manual`).
+This can be configured by setting `telegraf_agent_package_method` to one of the appropriate values ( `repo`, `online`, `offline`, `manual`, `local-repo`).
 
 #### Telegraf Package
 
 These properties set in how and what package will be installed.
 
 * `telegraf_agent_package`: The name of the Telegraf package to install. When `telegraf_agent_package_method` is set to `online` or `offline`, it needs to have the full path of the file. Example: `telegraf_agent_package: /tmp/telegraf.rpm`. Default: `telegraf_agent_package: telegraf`.
-* `telegraf_agent_package_method`: The installation method to be used. Can choose between: `repo`, `offline` or `online`.
+* `telegraf_agent_package_method`: The installation method to be used. Can choose between: `repo`, `offline`, `online`, `local-repo`.
 * `telegraf_agent_package_state`: If the package should be `present` or `latest`. When set to `latest`, `telegraf_agent_version` will be ignored. Default: `present`
 
 ### Telegraf agent process configuration.
