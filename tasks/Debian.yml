@@ -41,51 +41,43 @@
   when:
     - telegraf_agent_package_method == "repo"
   block:
-    - when: (ansible_distribution == "Debian" and ansible_distribution_major_version|int < 9) or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int < 18)
-      name: "Debian | Download Telegraf apt key"
-      apt_key:
-        url: "https://repos.influxdata.com/influxdata-archive.key"
-        id: 7df8b07e
-        state: present
+    - name: "Debian | Ensure the shared keyrings directory exists"
+      stat:
+        path: /usr/share/keyrings
+      register: usr_share_keyrings
+
+    - name: "Debian | Create shared keyrings directory"
+      file:
+        state: directory
+        path: /usr/share/keyrings
+        owner: root
+        group: root
+        mode: 0755
+      when:
+        - not usr_share_keyrings.stat.exists
+      become: true
+
+    - name: "Debian | Install Telegraf apt key"
+      get_url:
+        url: https://repos.influxdata.com/influxdata-archive.key
+        dest: /usr/share/keyrings/influxdata-archive.asc
       register: are_telegraf_dependencies_keys_installed
       until: are_telegraf_dependencies_keys_installed is succeeded
       become: true
-    - when: (ansible_distribution == "Debian" and ansible_distribution_major_version|int >= 9) or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 18)
-      block:  
-        - name: "Debian | Ensure the shared keyrings directory exists"
-          stat:
-            path: /usr/share/keyrings
-          register: usr_share_keyrings
+      environment:
+        http_proxy: "{{ telegraf_http_proxy_get_url | default(None) | default(omit) }}"
+        https_proxy: "{{ telegraf_http_proxy_get_url | default(None) | default(omit) }}"
 
-        - name: "Debian | Create shared keyrings directory"
-          file:
-            state: directory
-            path: /usr/share/keyrings
-            owner: root
-            group: root
-            mode: 0755
-          when:
-            - not usr_share_keyrings.stat.exists
-          become: true
-          
-        - name: "Debian | Install Telegraf apt key"
-          get_url:
-            url: https://repos.influxdata.com/influxdata-archive.key
-            dest: /usr/share/keyrings/influxdata-archive.asc
-          register: are_telegraf_dependencies_keys_installed
-          until: are_telegraf_dependencies_keys_installed is succeeded
-          become: true
-
-        - name: "Debian | Set Telegraf apt repository parameters"
-          set_fact: 
-            telegraf_repository_params: "[signed-by=/usr/share/keyrings/influxdata-archive.asc]"
+    - name: "Debian | Set Telegraf apt repository parameters"
+      set_fact:
+        telegraf_repository_params: "[signed-by=/usr/share/keyrings/influxdata-archive.asc]"
 
     - name: "Debian | Add Telegraf repository"
       copy:
         content: "deb {{ telegraf_repository_params | default('') }} https://repos.influxdata.com/{{ ansible_distribution|lower }} stable main"
         dest: /etc/apt/sources.list.d/telegraf.list
       become: yes
-    
+
     - name: "Debian | Install Telegraf package (repo)"
       apt:
         name: "{{ telegraf_agent_package }}"
@@ -114,10 +106,10 @@
   get_url:
     url: https://dl.influxdata.com/telegraf/releases/{{ telegraf_agent_package_file_deb }}
     dest: "{{ telegraf_agent_package_path }}/{{ telegraf_agent_package }}"
-    use_proxy: "{{ true if http_proxy is defined and http_proxy else false }}"
+    use_proxy: "{{ true if telegraf_http_proxy_get_url is defined and telegraf_http_proxy_get_url else false }}"
   environment:
-    http_proxy: "{{ http_proxy | default(None) | default(omit) }}"
-    https_proxy: "{{ https_proxy | default(None) | default(omit) }}"
+    http_proxy: "{{ telegraf_http_proxy_get_url | default(None) | default(omit) }}"
+    https_proxy: "{{ telegraf_http_proxy_get_url | default(None) | default(omit) }}"
   when:
     - telegraf_agent_package_method == "online"
 

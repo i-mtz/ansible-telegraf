@@ -2,7 +2,7 @@
 telegraf_enabled: True
 # defaults file for ansible-telegraf
 
-telegraf_agent_version: 1.18.2
+telegraf_agent_version: 1.33.0
 telegraf_agent_version_patch: 1
 telegraf_agent_package: telegraf
 telegraf_agent_package_file_deb: telegraf_{{ telegraf_agent_version }}-{{ telegraf_agent_version_patch }}_{{ telegraf_agent_package_arch }}.deb
@@ -20,6 +20,9 @@ telegraf_agent_aws_tags: False
 telegraf_agent_aws_tags_prefix: ""
 telegraf_agent_config_path: /etc/telegraf
 telegraf_win_logfile_rotation_max_archives: 3
+
+# set this to your proxy value to fetch the repo key and repo package during initial setup
+telegraf_http_proxy_get_url: ""
 
 # Docker specific settings
 telegraf_uid_docker: 998
