@@ -208,3 +208,39 @@
   tags:
     - telegraf
     - monitoring
+
+- name: Configure MySQL user for Telegraf
+  when: telegraf_mysql_enabled | bool
+  block:
+
+    - name: Check if MySQL user exists
+      community.mysql.mysql_user:
+        name: "{{ telegraf_mysql_user }}"
+        host: "localhost"
+        state: present
+      check_mode: true
+      register: _mysql_user_check
+
+    - name: User exists?
+      debug:
+        msg: "User exists"
+      when: not _mysql_user_check.changed
+
+    - name: Ensure Telegraf MySQL user exists (socket auth, localhost only)
+      community.mysql.mysql_user:
+        name: "{{ telegraf_mysql_user }}"
+        host: "localhost"
+        state: present
+        resource_limits:
+          MAX_USER_CONNECTIONS: "{{ telegraf_mysql_max_user_connections }}"
+        priv: |
+          *.*:PROCESS,REPLICATION CLIENT,SHOW DATABASES
+          performance_schema.*:SELECT
+          information_schema.*:SELECT
+        append_privs: true
+        login_user: "{{ telegraf_mysql_login_user }}"
+        login_unix_socket: "{{ telegraf_mysql_login_socket }}"
+      when: _mysql_user_check.changed
+      notify:
+        - Restart Telegraf
+
