@@ -97,3 +97,11 @@ telegraf_win_service_args:
   - '--config-directory "{{ telegraf_win_include }}"'
 telegraf_mac_user: user
 telegraf_mac_group: admin
+
+telegraf_mysql_enabled: false
+telegraf_mysql_user: telegraf
+telegraf_mysql_auth_plugin: auth_socket   # mariadb: unix_socket
+telegraf_mysql_login_user: root
+telegraf_mysql_login_socket: /var/run/mysqld/mysqld.sock
+telegraf_mysql_max_user_connections: 10 # 10 is a reasonable value, 1 might break on service reload/restarts
+telegraf_mysql_auth_plugin: unix_socket
