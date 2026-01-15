@@ -62,7 +62,7 @@
         url: https://repos.influxdata.com/influxdata-archive.key
         dest: /usr/share/keyrings/influxdata-archive.asc
         checksum: "sha256:{{ telegraf_archive_key_checksum }}"
-        use_proxy: "{{ true if http_proxy is defined and http_proxy else false }}"
+        use_proxy: "{{ true if telegraf_http_proxy_get_url is defined and telegraf_http_proxy_get_url else false }}"
       register: are_telegraf_dependencies_keys_installed
       until: are_telegraf_dependencies_keys_installed is succeeded
       become: true
