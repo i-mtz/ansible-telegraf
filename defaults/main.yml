@@ -71,6 +71,10 @@ telegraf_plugins_default:
 telegraf_plugins_extra: {}
 telegraf_plugins_extra_exclusive: False
 
+# If mysql plugin is to be used set this to True
+telegraf_mysql_enabled: False
+telegraf_mysql_user: "telegraf"
+
 # RedHat specific settings for convenience
 telegraf_redhat_releasever: "$releasever"
 
