@@ -210,7 +210,7 @@
     - monitoring
 
 - name: Configure MySQL user for Telegraf
-  when: telegraf_mysql_enabled | bool
+  when: telegraf_mysql_enabled | default('false') | bool
   block:
 
     - name: Check if MySQL user exists
