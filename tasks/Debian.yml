@@ -60,9 +60,8 @@
     - name: "Debian | Install Telegraf apt key"
       get_url:
         url: https://repos.influxdata.com/influxdata-archive.key
-        dest: /usr/share/keyrings/influxdata-archive.asc
-        checksum: "sha256:{{ telegraf_archive_key_checksum }}"
-        use_proxy: "{{ true if telegraf_http_proxy_get_url is defined and telegraf_http_proxy_get_url else false }}"
+        dest: "{{ telegraf_archive_key_path }}"
+        checksum: "{{ telegraf_archive_key_checksum }}"
       register: are_telegraf_dependencies_keys_installed
       until: are_telegraf_dependencies_keys_installed is succeeded
       become: true
@@ -70,13 +69,35 @@
         http_proxy: "{{ telegraf_http_proxy_get_url | default(None) | default(omit) }}"
         https_proxy: "{{ telegraf_http_proxy_get_url | default(None) | default(omit) }}"
 
-    - name: "Debian | Set Telegraf apt repository parameters"
-      set_fact:
-        telegraf_repository_params: "[signed-by=/usr/share/keyrings/influxdata-archive.asc]"
+    - name: "Debian | Check if the gpg key is already in place"
+      ansible.builtin.stat:
+        path: "{{ telegraf_repo_key_path }}"
+      register: influxdb_gpg_key
+
+    - name: Dearmor key (update if source changed)
+      ansible.builtin.command:
+        cmd: >
+          gpg --dearmor
+          -o {{ telegraf_repo_key_path }}
+          {{ telegraf_archive_key_path }}
+      when: not influxdb_gpg_key.stat.exists
+
+    # This is to avoid ubuntu esm repo taking precedence and installing an old version
+    - name: "Debian | Configure repository priority"
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/telegraf-upstream
+        owner: root
+        group: root
+        mode: 0644
+        content: |
+          # managed by ansible
+          Package: telegraf
+          Pin: origin repos.influxdata.com
+          Pin-Priority: 520
 
     - name: "Debian | Add Telegraf repository"
       copy:
-        content: "deb {{ telegraf_repository_params | default('') }} https://repos.influxdata.com/{{ ansible_distribution|lower }} stable main"
+        content: "deb [signed-by={{ telegraf_repo_key_path }}] https://repos.influxdata.com/{{ ansible_distribution|lower }} stable main"
         dest: /etc/apt/sources.list.d/telegraf.list
       become: yes
 
