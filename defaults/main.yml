@@ -72,8 +72,13 @@ telegraf_plugins_extra: {}
 telegraf_plugins_extra_exclusive: False
 
 # If mysql plugin is to be used set this to True
-telegraf_mysql_enabled: False
-telegraf_mysql_user: "telegraf"
+telegraf_mysql_enabled: false
+telegraf_mysql_user: telegraf
+telegraf_mysql_auth_plugin: auth_socket   # mariadb: unix_socket
+telegraf_mysql_login_user: root
+telegraf_mysql_login_socket: /var/run/mysqld/mysqld.sock
+telegraf_mysql_max_user_connections: 10 # 10 is a reasonable value, 1 might break on service reload/restarts
+telegraf_mysql_auth_plugin: unix_socket
 
 # RedHat specific settings for convenience
 telegraf_redhat_releasever: "$releasever"
@@ -106,10 +111,3 @@ telegraf_archive_key_checksum: "sha256:40557e261cdbdccac91a2dde474cbf101ef672661
 telegraf_archive_key_path: "/usr/share/keyrings/influxdata-archive.key"
 telegraf_repo_key_path: "/etc/apt/trusted.gpg.d/influxdata-archive.gpg"
 
-telegraf_mysql_enabled: false
-telegraf_mysql_user: telegraf
-telegraf_mysql_auth_plugin: auth_socket   # mariadb: unix_socket
-telegraf_mysql_login_user: root
-telegraf_mysql_login_socket: /var/run/mysqld/mysqld.sock
-telegraf_mysql_max_user_connections: 10 # 10 is a reasonable value, 1 might break on service reload/restarts
-telegraf_mysql_auth_plugin: unix_socket
